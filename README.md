@@ -1,8 +1,8 @@
 btcdmon
 ========
-####A drop-in monitoring solution for your partial view of the Bitcoin P2P network!
+#### A drop-in monitoring solution for your partial view of the Bitcoin P2P network!
 
-##What is this?
+## What is this?
 `btcdmon` is a drop-in, dockerzied monitoring/metric-collection solution for individual nodes within the Bitcoin distributed system. With this system, you'll be able to closely monitor the health, status, and behavioral patterns of your ```btcd``` node(s) and subsequently the Bitcoin network as a whole. 
 
 btcdmon only supports [btcd](https://github.com/conformal/btcd): an alternative full node bitcoin implementation written in Go written, and maintained by [conformal](https://www.conformal.com/). If you're looking for a similar system, but for a Bitcoin Core node instead, then you should check out [statoshi](https://github.com/jlopp/statoshi). Although, `btcdmon` differs from statoshi in many ways.
@@ -14,10 +14,10 @@ There are three primary components of the `btcdmon` system:
 3. And last but not least, our frontend! What good is all that beautiful data if we can't visualize, tinker, and poke it from all angles? `btcdmon` uses [Grafana](http://grafana.org/) for its primary dashboard to display all its collected metrics. Grafana is highly configurable and creates some truly beautiful graphs. Grafana is served by an [nginx](http://nginx.org/) instance. InfluxDB also provides a native admin dashboard which is also served by nginx. 
 
 
-##Why would I want to use this?
+## Why would I want to use this?
 SSHing into your box and refreshing your node's logs or poking it with `getinfo` commands is rather, uh boring! And also, because data. Monitoring can provide crucial insights to the health large-scale distributed systems. Without monitoring systems like  `btcdmon`, the only view into the health of Bitcoin nodes and the network as a whole are fragmented logs. Logs can be invaluable for debugging scenarios but are rather opaque and don't provide a clear view of what's going on under the hood. By exporting and graphing interesting metrics, one can get a real-time transparent view of the behavior of your Bitcoin node(s) and the network. It's also pretty cool to see your node carry out intergral network services in real-time. Such as serving blocks to a fresh syncing node, validating new blocks, and slinging out merkle blocks to SPV nodes. 
 
-##How do I install this?
+## How do I install this?
 * Installation instructions assume you already have ```docker``` installed. If this is not the case, then check out the [official installation docs](https://docs.docker.com/installation/) so you can get ```docker``` up and running on your machine. 
 
 1. First up, our modified btcd node. You can find the repository [here](https://github.com/Roasbeef/btcd) under the branch `btcdmon` (if it isn't stil the default branch). 
@@ -37,24 +37,24 @@ SSHing into your box and refreshing your node's logs or poking it with `getinfo`
    * Build the frontend:
      * ```$ docker build -t="btcdmon-nginx" nginx-grafana```
 
-##How do I run this? 
+## How do I run this? 
 Running, linking, and managing the system is simple due its dockerization. 
 
 1. First, we'll get the backend up and running:
-   * ``` $docker run -d --name influxdb -v /home/influxdb/data:/data -p 4444:4444/udp btcdmon-influxdb```
+   * `docker run -d --name influxdb -v /home/influxdb/data:/data -p 4444:4444/udp btcdmon-influxdb`
    * If it doesn't start up intially, there might be something wrong with your configuration. You can start up the container in interactive mode by passing `-i -t` for arguments instead of `-d` to aide with debugging. 
 2. Next, lets fire up our frontend:
-   * ```$ docker run -d --name nginx -p 80:80 -p 443 --link influxdb:influxdb btcdmon-nginx```
+   * `docker run -d --name nginx -p 80:80 -p 443 --link influxdb:influxdb btcdmon-nginx`
    * With the `--link` flag and arguments docker handles some network configuration magically for us, so the nginx container knows where to reach the influxdb container at. 
 3. Finally, you'll need to start up your btcdmon btcd node:
-   * If you did a direct installation on another machine, ```$ ./btcd``` will do.
+   * If you did a direct installation on another machine, `./btcd` will do.
    * If you installed the btcd fork inside a container then this command should do the trick (handling some port mapping along the way):
-     * ```$ docker run -p 8333:8333 -d -v /root/.btcd/:/root/.btcd/ -v /root/.btcctl/:/root/.btcctl/ --name btcd roasbeef/btcd --externalip <your_external_ip_address>```
+     * `docker run -p 8333:8333 -d -v /root/.btcd/:/root/.btcd/ -v /root/.btcctl/:/root/.btcctl/ --name btcd roasbeef/btcd --externalip <your_external_ip_address>`
 
 Once NGINX turns up, you'll be able to access the main Grafana dashboard by pointing your browser to your frontend/backend box.
 InfluxDB ships with a admin interface that's defaultly configured to be available at the sub-domain `admin.*`. You'll need to set up your DNS records accordingly or change the `nginx.conf` to proxy from `/admin` or something like that, if you'd prefer a different access point. The admin interface allows one to manage add/drop time series, create precomputed continous queries, and as a play ground to examine the data. 
 
-##Querying 
+## Querying 
 
 InfluxDB provides a rather cool SQL-like language for querying stored time-series data. Data is grouped into individual time-series(s), you can think if these like SQL tables. These tables are schemaless allowing you to drop/add columns at will without any overhead. 
 
@@ -91,18 +91,18 @@ Here are some example queries:
     * (Typically dominated by those pesky Bitcoin seeders/trackers)
 
 
-##Screenshots
+## Screenshots
 
-####The main dashboard:
+#### The main dashboard:
 ![alt tag](https://raw.githubusercontent.com/Roasbeef/btcdmon/master/screenshots/admin.png)
 
-####The admin interface: 
+#### The admin interface: 
 ![alt tag](https://raw.githubusercontent.com/Roasbeef/btcdmon/master/screenshots/dashboard.png)
 
-##Bootstrapped Dashboard
+## Bootstrapped Dashboard
 
 It can take some time to learn how to use the Grafana interface, InfluxDB queries etc. So I've exported the configuration of the dashboard i'm currently running into a JSON format, to get you up and running with a fully functional dashboard. You can find the file in this repository under the name: `btcdmon-default-dashboard.json`. To import the seralized JSON dashboard, navigate to your dashboard and locate the folder icon in the top left. Click that, and locate the `import` button next, uploading the file, and finally saving the dashboard config to InfluxDB. 
 
-##Future work
+## Future work
 
 Something, something, alerts, precomputed queries, TCP listeners for exporting metrics to central server monitoring a fleet of nodes. 
